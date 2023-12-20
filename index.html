@@ -48,7 +48,7 @@
 
     <div id="app" class="py-4 container-xl">
         <div class="mb-5 text-center">
-            
+
             <p class="display-5"><img src="rdp.png" class="rdpicon"> RDP File Editor</p>
             <span class="lead">Create and edit RDP files.</span>
         </div>
@@ -59,7 +59,7 @@
 
             <div class="position-absolute rdptop almostright">
             </div>
-            
+
             <div class="position-absolute rdpbottom almostleft ">
                 <div class="btn btn-outline-secondary bg-white text-muted btn-sm me-2" @click="clickLoad()">Load</div>
                 <div class="btn btn-outline-secondary bg-white text-muted btn-sm" @click="resetOptions()">Reset</div>
@@ -76,7 +76,8 @@
 
         <ul class="nav nav-tabs small">
             <li class="nav-item" v-for="category, catKey in userRdpOptions">
-                <a class="nav-link" href="#" :class="{active: selectedTab == catKey,  'fw-bold': selectedTab == catKey,'text-muted': selectedTab != catKey}"
+                <a class="nav-link" href="#"
+                    :class="{active: selectedTab == catKey,  'fw-bold': selectedTab == catKey,'text-muted': selectedTab != catKey}"
                     @click="selectedTab = catKey">{{catKey}}</a>
             </li>
         </ul>
@@ -92,18 +93,18 @@
                                 :class="{'text-primary': option.value != allRdpOptions[catKey][key].value}">{{ key }}</span></a>
                         </div>
 
-                        <div class="w-100 text-center p-2" v-if="expandedOption == key">
+                        <div class="w-100 text-center p-2 pt-0" v-if="expandedOption == key">
                             <div class="w-100 my-2 border rounded p-2 text-start bg-white">
                                 <span class="small" v-html="formatDescription(option.description)"></span>
                             </div>
 
-                            <div class="d-flex justify-content-around small my-2">
+                            <div class="d-flex justify-content-around small my-3">
                                 <span>Type: {{ fullType(option.type) }}</span>
-                                <span> Default:
+                                <span>Default:
                                     {{ allRdpOptions[catKey][key].value ? allRdpOptions[catKey][key].value : "(empty)" }}</span>
                             </div>
 
-                            <div class="w-100 d-flex">
+                            <div class="w-100 d-flex my-2">
                                 <input class="form-control outline-0" v-model="option.value" placeholder="empty">
                                 <button class="btn btn-danger ms-2"
                                     @click="userRdpOptions[catKey][key].value = allRdpOptions[catKey][key].value">Reset</button>
@@ -120,147 +121,148 @@
 
 
     <!-- Vue script -->
-<script>
-    // Vue application definition
-    const vueApp = {
-        // Data properties for the application
-        data() {
-            return {
-                allRdpOptions: {},        // Store all available RDP options
-                userRdpOptions: {},       // Store user-selected RDP options
-                expandedOption: "",        // Track expanded option for display
-                selectedTab: "Connection",  // Initially selected RDP option category
-            }
-        },
-
-        // Methods for handling data manipulation and user interactions
-        methods: {
-            // Deep copy function to create a copy of an object/array
-            deepCopy(arr) {
-                return JSON.parse(JSON.stringify(arr))
-            },
-
-            // Fetch RDP options from a JSON file
-            fetchOptions() {
-                fetch("rdpoptions.json")
-                    .then((httpResponse) => httpResponse.json())
-                    .then((responseData) => {
-                        this.allRdpOptions = responseData
-                        this.resetOptions()
-                    })
-            },
-
-            // Reset user-selected options to default
-            resetOptions() {
-                this.userRdpOptions = this.deepCopy(this.allRdpOptions)
-                this.userRdpOptions["Connection"]["full address"].value = window.location.hostname
-            },
-
-            // Format option descriptions with line breaks
-            formatDescription(rawDescription) {
-                return rawDescription.replace(/\n/gm, "<br>")
-            },
-
-            // Convert short type codes to full type names
-            fullType(shortType) {
-                const types = {
-                    "s": "Text",
-                    "i": "Number",
-                    "b": "Binary"
+    <script>
+        // Vue application definition
+        const vueApp = {
+            // Data properties for the application
+            data() {
+                return {
+                    allRdpOptions: {}, // Store all available RDP options
+                    userRdpOptions: {}, // Store user-selected RDP options
+                    expandedOption: "", // Track expanded option for display
+                    selectedTab: "Connection", // Initially selected RDP option category
                 }
-                return types[shortType]
             },
 
-            // Generate formatted RDP output string
-            rdpOutput() {
-                let outputString = "";  // Create a string to store the formatted output
+            // Methods for handling data manipulation and user interactions
+            methods: {
+                // Deep copy function to create a copy of an object/array
+                deepCopy(arr) {
+                    return JSON.parse(JSON.stringify(arr))
+                },
 
-                // Compare and add lines for changed options to the output string
-                for (let catKey in this.userRdpOptions) {
-                    for (let key in this.userRdpOptions[catKey]) {
-                        if (this.userRdpOptions[catKey][key].value !== this.allRdpOptions[catKey][key].value) {
-                            outputString +=
-                                `${key}:${this.userRdpOptions[catKey][key].type}:${this.userRdpOptions[catKey][key].value}\n`;
+                // Fetch RDP options from a JSON file
+                fetchOptions() {
+                    fetch("rdpoptions.json")
+                        .then((httpResponse) => httpResponse.json())
+                        .then((responseData) => {
+                            this.allRdpOptions = responseData
+                            this.resetOptions()
+                        })
+                },
+
+                // Reset user-selected options to default
+                resetOptions() {
+                    this.userRdpOptions = this.deepCopy(this.allRdpOptions)
+                    this.userRdpOptions["Connection"]["full address"].value = window.location.hostname
+                },
+
+                // Format option descriptions with line breaks
+                formatDescription(rawDescription) {
+                    return rawDescription.replace(/\n/gm, "<br>")
+                },
+
+                // Convert short type codes to full type names
+                fullType(shortType) {
+                    const types = {
+                        "s": "Text",
+                        "i": "Number",
+                        "b": "Binary"
+                    }
+                    return types[shortType]
+                },
+
+                // Generate formatted RDP output string
+                rdpOutput() {
+                    let outputString = ""; // Create a string to store the formatted output
+
+                    // Compare and add lines for changed options to the output string
+                    for (let catKey in this.userRdpOptions) {
+                        for (let key in this.userRdpOptions[catKey]) {
+                            if (this.userRdpOptions[catKey][key].value !== this.allRdpOptions[catKey][key].value) {
+                                outputString +=
+                                    `${key}:${this.userRdpOptions[catKey][key].type}:${this.userRdpOptions[catKey][key].value}\n`;
+                            }
                         }
                     }
-                }
 
-                return outputString;
-            },
+                    return outputString;
+                },
 
-            // Save the generated RDP file
-            saveRdpFile() {
-                // Set the filename: The RemoteApp Name if specified, otherwise the Full Address, otherwise RDP File.rdp
-                let filename = "RDP File.rdp"
-                if (this.userRdpOptions["RemoteApp"]["remoteapplicationname"].value) {
-                    filename = this.userRdpOptions["RemoteApp"]["remoteapplicationname"].value + ".rdp"
-                } else if (this.userRdpOptions["Connection"]["full address"].value) {
-                    filename = this.userRdpOptions["Connection"]["full address"].value.replace(/\./gm, "-") + ".rdp"
-                }
+                // Save the generated RDP file
+                saveRdpFile() {
+                    // Set the filename: The RemoteApp Name if specified, otherwise the Full Address, otherwise RDP File.rdp
+                    let filename = "RDP File.rdp"
+                    if (this.userRdpOptions["RemoteApp"]["remoteapplicationname"].value) {
+                        filename = this.userRdpOptions["RemoteApp"]["remoteapplicationname"].value + ".rdp"
+                    } else if (this.userRdpOptions["Connection"]["full address"].value) {
+                        filename = this.userRdpOptions["Connection"]["full address"].value.replace(/\./gm, "-") +
+                            ".rdp"
+                    }
 
-                // Get the RDP file content
-                const text = this.rdpOutput()
+                    // Get the RDP file content
+                    const text = this.rdpOutput()
 
-                // Create a download link and trigger the download
-                let element = document.createElement('a');
-                element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-                element.setAttribute('download', filename);
+                    // Create a download link and trigger the download
+                    let element = document.createElement('a');
+                    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+                    element.setAttribute('download', filename);
 
-                element.style.display = 'none';
-                document.body.appendChild(element);
+                    element.style.display = 'none';
+                    document.body.appendChild(element);
 
-                element.click();
+                    element.click();
 
-                document.body.removeChild(element);
-            },
-            
-            // Load an RDP file from the local filesystem
-            loadRdpFile(input) {
-                let file = input.target.files[0];
-                let reader = new FileReader();
-                reader.readAsText(file);
-                reader.onload = () => {
-                    const result = reader.result;
-                    const rdpFileLines = result.split("\n");
+                    document.body.removeChild(element);
+                },
 
-                    this.resetOptions();
+                // Load an RDP file from the local filesystem
+                loadRdpFile(input) {
+                    let file = input.target.files[0];
+                    let reader = new FileReader();
+                    reader.readAsText(file);
+                    reader.onload = () => {
+                        const result = reader.result;
+                        const rdpFileLines = result.split("\n");
 
-                    for (rdpFileLine of rdpFileLines) {
-                        if (rdpFileLine.match(/:/g) && rdpFileLine.match(/:/g).length === 2) {
-                            const rdpFileOption = rdpFileLine.split(":");
-                            for (let catKey in this.userRdpOptions) {
-                                for (let key in this.userRdpOptions[catKey]) {
-                                    if (key == rdpFileOption[0]) {
-                                        this.userRdpOptions[catKey][key].value = rdpFileOption[2]
+                        this.resetOptions();
+
+                        for (rdpFileLine of rdpFileLines) {
+                            if (rdpFileLine.match(/:/g) && rdpFileLine.match(/:/g).length === 2) {
+                                const rdpFileOption = rdpFileLine.split(":");
+                                for (let catKey in this.userRdpOptions) {
+                                    for (let key in this.userRdpOptions[catKey]) {
+                                        if (key == rdpFileOption[0]) {
+                                            this.userRdpOptions[catKey][key].value = rdpFileOption[2]
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
-                };
-                
-                reader.onerror = function() {
-                    console.log(reader.error);
-                };
+                    };
+
+                    reader.onerror = function () {
+                        console.log(reader.error);
+                    };
+                },
+
+                // Activate the hidden input used for selecting an RDP file from the local filesystem
+                clickLoad() {
+                    document.getElementById("fileloadinput").click()
+                },
+
             },
 
-            // Activate the hidden input used for selecting an RDP file from the local filesystem
-            clickLoad() {
-                document.getElementById("fileloadinput").click()
-            },
-            
-        },
-
-        // Lifecycle hook to fetch options when the component is mounted
-        mounted() {
-            this.fetchOptions()
+            // Lifecycle hook to fetch options when the component is mounted
+            mounted() {
+                this.fetchOptions()
+            }
         }
-    }
 
-    // Create a Vue app and mount it to the #app element
-    const app = Vue.createApp(vueApp)
-    const vm = app.mount("#app")
-</script>
+        // Create a Vue app and mount it to the #app element
+        const app = Vue.createApp(vueApp)
+        const vm = app.mount("#app")
+    </script>
 </body>
 
 </html>
